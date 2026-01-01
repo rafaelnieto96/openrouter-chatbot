@@ -130,10 +130,83 @@ const PromptForm = ({
             {fileAttachment && (
               <div className="flex items-center gap-2">
                 <div className="px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-xs text-zinc-300 max-w-50 truncate">
-
+                  {fileAttachment.name}
                 </div>
+                <RemoveButton onClick={clearFile} />
               </div>
             )}
+          </div>
+
+          {/* Form footer with model selector and action buttons */}
+          <div className="flex flex-col justify-between pt-4 border-t border-zinc-700/50 gap-3 sm:flex-row sm:items-center sm:gap-0">
+            {/* Left side: Model selector and keyboard shortcut hint */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              {/* Model selection dropdown */}
+              <label className="flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border border-zinc-700/50 rounded-xl text-sm text-zinc-200 shadow-inner w-full sm:w-auto">
+                <FaBrain className="w-3 h-3 text-blue-400 shrink-0 sm:w-4 h-4" />
+                <select
+                  value={selectedModel.id}
+                  onChange={(e) => onModelChange(e.target.value)}
+                  className="bg-transparent border-none focus:outline-none text-sm text-zinc-200 pr-2 cursor-pointer flex-1 min-w-0"
+                >
+                  {models.map((model) => (
+                    <option
+                      value={model.id}
+                      key={model.id}
+                      className="bg-zinc-900 text-zinc-200"
+                    >
+                      {model.shortLabel}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {/* Keyboard shortcut hint (desktop only) */}
+              <div className="text-xs text-zinc-500 hidden sm:block">
+                Press{" "}
+                <kbd className="px-1.5 py-0 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">
+                  ⌘
+                </kbd>{" "}
+                + +{" "}
+                <kbd className="px-1.5 py-0 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">
+                  Enter
+                </kbd>{" "}
+                to send
+              </div>
+            </div>
+            {/* Right side: Action buttons */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {/* Clar button */}
+              <button
+                type="button"
+                onClick={onClearAll}
+                disabled={disableClear}
+                className="flex-1 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800 disabled:opacity-50 border border-zinc-700 rounded-xl text-zinc-700 rounded-xl text-zinc-400 hover:text-zinc-200 transition-all duration-200 disabled:cursor-not-allowed font-medium sm:flex-none sm:px-6"
+                title="Clear"
+              >
+                <div className="flex intems-center justify-center gap-2">
+                  <FaTrash className="w-4 h-4" />
+                  <span className="hidden sm:inline">Clear</span>
+                </div>
+              </button>
+              {/* Submit button with loading state */}
+              <button
+                type="submit"
+                disabled={disableSubmit}
+                className="flex-1 px-4 py-2 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-zinc-700 disabled:to-zinc-800 disabled:opacity-50 border border-zinc-700 disabled:border-zinc-700 rounded-xl text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <FaRobot className="w-4 h-4 animate-spin" />
+                    <span className="hidden sm:inline">Thinking...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <FaPaperPlane className="w-4 h-4" />
+                    <span>Send</span>
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>
