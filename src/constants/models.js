@@ -15,7 +15,7 @@ export const MODELS = [
 ]
 
 // Set of model IDs that support vision/image analysis capabilities
-export const VISION_MODEL_ID = new Set([
+export const VISION_MODEL_IDS = new Set([
     'amazon/nova-2-lite-v1:free',
     'nvidia/nemotron-nano-12b-v2-vl:free',
 ])
