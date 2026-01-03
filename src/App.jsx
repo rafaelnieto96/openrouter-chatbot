@@ -2,7 +2,7 @@
 // Handles user interaction, API calls to OpenRouter, and state management
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { API_URLS, fallbackHeaders, MAX_FILE_CHARS } from "./constants/api";
+import { API_URL, fallbackHeaders, MAX_FILE_CHARS } from "./constants/api";
 import {
   MODELS,
   NOVA_FILE_MODEL_ID,
@@ -13,8 +13,6 @@ import ErrorBanner from "./components/ErrorBanner";
 import Header from "./components/Header";
 import PromptFrom from "./components/PromptForm";
 import QuickActions from "./components/QuickActions";
-import { set } from "express/lib/application";
-import { is } from "express/lib/request";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -142,6 +140,7 @@ function App() {
 
     // Check what content the user has provided
     const hasText = !!prompt.trim();
+    const hasImage = imageData !== null;
     const hasFile = isNovaFileModel && !!fileAttachment?.content;
 
     // Prevent submission if already loading or no valid content
@@ -161,7 +160,7 @@ function App() {
 
     setLoading(true);
     try {
-      // Build message content based on avbailable inputs (text, file, image)
+      // Build message content based on available inputs (text, file, image)
       const parts = [];
       const hasAttachments = isVisionModel && hasImage;
       const fallbackText =
@@ -199,7 +198,7 @@ function App() {
         parts.length > 0 ? parts : [{ type: "text", text: prompt.trim() }];
 
       // Make API calls to OpenRouter
-      const response = await fetch(API_URLS, {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: apiHeaders,
         body: JSON.stringify({
@@ -222,45 +221,54 @@ function App() {
         throw new Error(`HTTP Error: ${errorMsg}`);
       }
 
-      // Parse succesful response
-      const data = await response.json();
-      const choice = data.choices?.[0];
+      // Process streaming response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
 
-      // Handle API-level errors
-      if (choice?.error?.message) {
-        throw new Error(`API Error: ${choice.error.message}`);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            
+            // Skip [DONE] message
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || '';
+              
+              if (content) {
+                fullResponse += content;
+                setAnswer(fullResponse);
+              }
+            } catch (e) {
+              // Ignore malformed lines
+              console.warn('Failed to parse SSE line:', data);
+            }
+          }
+        }
       }
 
-      // Process and normalize the assistant's answer
-      let reply = choice?.message?.content || "";
-      if (Array.isArray(reply)) {
-        //Handle array responses (some models return content as arrays)
-        reply = reply
-          .map((part) => {
-            if (typeof part === "string") return part;
-            if (part?.text) return part.text;
-            if (part?.output_text) return part.output_text;
-            return "";
-          })
-          .filter(Boolean)
-          .join("\n");
+      // Validate we got some response
+      if (!fullResponse.trim()) {
+        throw new Error('Empty response from the model.');
       }
 
-      // Validate response content
-      if (!reply || (typeof reply !== "string" && reply.trim() === "")) {
-        const backendError =
-          data?.error?.message || "Empty response from the model.";
-        throw new Error(`Response error: ${backendError}`);
-      }
-
-      // Success - update state and clear attachments
-      setAnswer(reply);
+      // Success - clear attachments
       resetAttachments();
     } catch (err) {
       // Handle and display errors
       setError(err?.message || "An unexpected error occurred.");
+      setAnswer("");
     } finally {
-      // Aalways stop loading state
+      // Always stop loading state
       setLoading(false);
     }
   };
@@ -272,16 +280,8 @@ function App() {
       return;
     }
 
-    let i = 0;
-    const id = setInterval(() => {
-      i += 1;
-      setDisplayedAnswer(answer.slice(0, i));
-      if (i >= answer.length) {
-        clearInterval(id);
-      }
-    }, 12); // 83 characters per second
-
-    return () => clearInterval(id);
+    // Con streaming, mostrar directamente sin animación adicional
+    setDisplayedAnswer(answer);
   }, [answer]);
 
   // Handler functions for user interactions
@@ -292,12 +292,13 @@ function App() {
     if (nextModel) {
       setSelectedModel(nextModel);
     }
-
-    // Set prompt text when user selected a quick action
-    const handleQuickActionSelect = (text) => {
-      setPrompt(text);
-    };
   };
+
+  // Set prompt text when user selected a quick action
+  const handleQuickActionSelect = (text) => {
+    setPrompt(text);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
       <div className="relative z-10 flex flex-col min-h-screen">
