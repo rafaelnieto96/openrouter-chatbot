@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const CodeBlock = ({ inline, className, children, ...props }) => {
   // State for copy button feedback
-  const [copied, isCopied] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Extract language from className (e.g., language-javascript)
   const match = /language-(\w+)/.exec(className || "");
@@ -30,7 +30,7 @@ const CodeBlock = ({ inline, className, children, ...props }) => {
             {children}
           </code>
         </pre>
-        {/* Copy button - appear on hover */}
+        {/* Copy button - appears on hover */}
         <button
           type="button"
           onClick={handleCopy}
@@ -42,7 +42,7 @@ const CodeBlock = ({ inline, className, children, ...props }) => {
     );
   }
 
-  //   Render inline code (fallback for single backticks)
+  // Render inline code (fallback for single backticks)
   return (
     <code className="bg-zinc-800 px-1 py-0.5 rounded text-zinc-200" {...props}>
       {children}

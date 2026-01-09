@@ -9,15 +9,15 @@ const Header = ({ selectedModel }) => (
         {/* Logo and title section */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Animated logo with gradient background */}
-          <div className="w-7 h-7 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg sm:w-8 sm:h-8">
+          <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg sm:w-8 sm:h-8">
             <FaBolt className="w-3 h-3 text-white sm:w-4 sm:h-4" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-linear-to-r from-white to-zinc-300 bg-clip-text text-transparent sm:text-xl">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-white to-zinc-300 bg-clip-text text-transparent sm:text-xl">
               AI Assistant
             </h1>
             <p className="text-xs text-zinc-500">
-              {/* Powered by OpenRouter */}
+              Powered by OpenRouter
             </p>
           </div>
         </div>
@@ -25,7 +25,7 @@ const Header = ({ selectedModel }) => (
         {/* Model status indicator */}
         <div className="flex items-center gap-2">
           {/* Current selected model badge */}
-          <div className="px-2 py-1 bg-zinc-800/60 border-zinc-700/50 rounded-full text-xs text-zinc-400 backdrop-blur-sm sm:px-3 sm:py-1.5">
+          <div className="px-2 py-1 bg-zinc-800/60 border border-zinc-700/50 rounded-full text-xs text-zinc-400 backdrop-blur-sm sm:px-3 sm:py-1.5">
             <span className="hidden sm:inline">
               {selectedModel?.shortLabel}
             </span>
