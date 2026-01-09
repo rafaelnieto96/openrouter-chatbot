@@ -1,6 +1,10 @@
 // Main application component for an AI assistant interface
 // Handles user interaction, API calls to OpenRouter, and state management
 
+// ToDo: When sending a new input message, clear previous answer and displayedAnswer
+// ToDo: Don't delete last message when sending a new one (chat history)
+// ToDo: Delete chat history when changing model
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { API_URL, fallbackHeaders, MAX_FILE_CHARS } from "./constants/api";
 import {
