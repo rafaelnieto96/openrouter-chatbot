@@ -11,23 +11,21 @@ import {
 import AssistantResponse from "./components/AssistantResponse";
 import ErrorBanner from "./components/ErrorBanner";
 import Header from "./components/Header";
-import PromptFrom from "./components/PromptForm";
+import PromptForm from "./components/PromptForm";
 import QuickActions from "./components/QuickActions";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   // State management for AI assistant interface
 
   // Model selection and configuration
   const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 
-  //User input and AI response
+  // User input and AI response
   const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [displayedAnswer, setDisplayedAnswer] = useState("");
 
-  //   File and image attachments
+  // File and image attachments
   const [imageData, setImageData] = useState(null);
   const [fileAttachment, setFileAttachment] = useState(null);
 
@@ -39,7 +37,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Prepare API header sith authorization and referrer information
+  // Prepare API headers with authorization and referrer information
   const apiHeaders = useMemo(() => {
     const key = import.meta.env.VITE_OPENROUTER_API_KEY;
     const referer = typeof window !== "undefined" ? window.location.origin : "";
@@ -50,7 +48,7 @@ function App() {
     };
   }, []);
 
-  //Determine model capabilities based on selected model
+  // Determine model capabilities based on selected model
   const isVisionModel = useMemo(
     () => VISION_MODEL_IDS.has(selectedModel.id),
     [selectedModel.id]
@@ -60,7 +58,7 @@ function App() {
     [selectedModel.id]
   );
 
-  // Helper funtions for managing attachments
+  // Helper functions for managing attachments
 
   const clearImage = () => {
     setImageData(null);
@@ -86,7 +84,7 @@ function App() {
     resetAttachments();
   };
 
-  // File and image handling funcittions
+  // File and image handling functions
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -102,7 +100,7 @@ function App() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    //   Check file size limit (2MB)
+    // Check file size limit (2MB)
     if (file.size > 2 * 1024 * 1024) {
       setError("File size exceeds 2MB limit.");
       return;
@@ -127,14 +125,14 @@ function App() {
     reader.readAsText(file);
   };
 
-  //   Clear file attachment when switching away from Nova file model
+  // Clear file attachment when switching away from Nova file model
   useEffect(() => {
     if (!isNovaFileModel) {
       clearFile();
     }
   }, [isNovaFileModel]);
 
-  //   Main function to handle form submission and API call to OpenRouter
+  // Main function to handle form submission and API call to OpenRouter
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -197,7 +195,7 @@ function App() {
       const messageContent =
         parts.length > 0 ? parts : [{ type: "text", text: prompt.trim() }];
 
-      // Make API calls to OpenRouter
+      // Make API call to OpenRouter
       const response = await fetch(API_URL, {
         method: "POST",
         headers: apiHeaders,
@@ -273,14 +271,14 @@ function App() {
     }
   };
 
-  //   Typing animation effect - displays answer character by character
+  // Typing animation effect - with streaming, display answer directly
   useEffect(() => {
     if (!answer) {
       setDisplayedAnswer("");
       return;
     }
 
-    // Con streaming, mostrar directamente sin animación adicional
+    // With streaming, display directly without additional animation
     setDisplayedAnswer(answer);
   }, [answer]);
 
@@ -294,7 +292,7 @@ function App() {
     }
   };
 
-  // Set prompt text when user selected a quick action
+  // Set prompt text when user selects a quick action
   const handleQuickActionSelect = (text) => {
     setPrompt(text);
   };
@@ -311,7 +309,7 @@ function App() {
               displayedAnswer={displayedAnswer}
               selectedModel={selectedModel}
             />
-            <PromptFrom
+            <PromptForm
               prompt={prompt}
               onPromptChange={setPrompt}
               onSubmit={handleSubmit}
